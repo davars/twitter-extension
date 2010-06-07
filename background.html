@@ -1,0 +1,69 @@
+<script src="jquery-1.4.1.min.js"></script>
+<script>
+$(document).ready(function () {
+    var receivedMessages = [];
+    
+    function setLastChecked() {
+        localStorage.lastChecked = new Date().getTime();       
+    }
+        
+    function getLastChecked() {
+        var lastChecked = localStorage.lastChecked || "0";
+        return parseInt(lastChecked, 10);        
+    }
+    
+    function setLastMessage(message) {
+        localStorage.lastMessage = message.id;
+    }
+    
+    function getLastMessage() {
+        return localStorage.lastMessage || Number.MIN_VALUE;
+    }
+    
+    function generateNotifications() {
+        if(!!localStorage.notifications) {
+            $.each(receivedMessages, function(i, message) {
+                if(message.id > getLastMessage()){
+                    var popup = window.webkitNotifications.createNotification(
+                                    message.user.profile_image_url,
+                                    message.user.screen_name,
+                                    message.text
+                                    );
+                    popup.ondisplay = function() {
+                        setTimeout(function () { popup.cancel() }, 10000);
+                    }
+                    popup.show();                
+                }
+            });
+        }        
+        setLastMessage(receivedMessages[0]);
+    }
+    
+    function setIcon() {
+        var newMessages = new Date(receivedMessages[0].created_at).getTime() > getLastChecked();
+        chrome.browserAction.setIcon({'path': newMessages ? 't_mini-c.png' : 't_mini-b.png'});
+    }
+        
+    function onInterval() {
+        var username = localStorage.username;
+        var password = localStorage.password;
+        if(username && password) {
+            $.get('http://'+ username +':'+ password +
+                  '@api.twitter.com/1/statuses/home_timeline.json', function(messages) {
+                receivedMessages = messages;
+                generateNotifications();
+                setIcon();
+            });
+        }
+    }
+    
+    setInterval(onInterval, 60*1000);
+    
+    chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+        setLastChecked();
+        sendResponse(receivedMessages);
+        setIcon();
+    });
+    
+});
+</script>

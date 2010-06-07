@@ -1,0 +1,65 @@
+<html>
+<head>
+<title>Twitter Status Options</title>
+
+<script src="jquery-1.4.1.min.js"></script>
+<script type="text/javascript">
+function save_options () {
+    localStorage.username = $('#username').val();
+    localStorage.password = $('#password').val();
+    localStorage.notifications = $('#notifications').attr('checked') ? "true" : "";
+  
+    // Update status to let user know options were saved.
+    var status = $('#status');
+    status.html('Options Saved.');
+    setTimeout(function() {
+      status.html('');
+    }, 750);
+}
+
+function restore_options() {
+    $('#username').val(localStorage.username);
+    $('#password').val(localStorage.password);
+    $('#notifications').attr('checked', !!localStorage.notifications);
+}
+
+function reset_last() {
+    localStorage.removeItem('lastChecked');
+    
+    var status = $('#status');
+    status.html('Reset Last Checked.');
+    setTimeout(function() {
+      status.html('');
+    }, 750);
+}
+
+$(document).ready(function() {    
+    restore_options();
+});
+</script>
+
+<body>
+
+<fieldset>
+    <legend>Twitter Account</legend>
+    <label id='status'></label>
+    <ul>
+        <li>
+            <label for="username">Username:</label>
+            <input name="username" id="username">
+        </li>
+        <li>             
+            <label for="password">Password:</label>           
+            <input name="password" id="password" type="password">
+        </li>
+        <li>             
+            <label for="notifications">Show a desktop notifications for new Tweets:</label>           
+            <input name="notifications" id="notifications" type="checkbox">
+        </li>
+        
+    </ul>
+    <button onclick="save_options()">Save</button>
+    <button onclick="reset_last()">Reset Last Checked</button>
+</fieldset>
+</body>
+</html>

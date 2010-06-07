@@ -1,0 +1,16 @@
+{
+  "name": "Twitter Home Timeline",
+  "version": "1.5",
+  "description": "Display Twitter home timeline updates.",
+  "background_page": "background.html",
+  "options_page": "options.html",
+  "browser_action": {
+    "default_icon": "t_mini-b.png",
+    "popup": "popup.html"
+  },
+  "permissions": [
+    "notifications",
+    "tabs",
+    "http://api.twitter.com/"
+  ]
+}

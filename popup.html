@@ -1,0 +1,64 @@
+<style>
+body {
+    color:#000;
+    font:80% Arial,Sans-serif;
+    margin-right: 25px;
+}
+#messages img {
+    width:15px;
+    height:15px;
+}
+
+#messages span.name {
+    padding-left: 5px;
+    font-size:smaller;
+}
+
+#messages span.text {
+    display:block;
+}
+div.status {
+    min-width:350px;
+    padding: 5px;
+    border-top: solid 1px #eee;
+}
+
+a {
+    color: #2276BB;
+    text-decoration: none;
+}
+</style>
+
+<script src="jquery-1.4.1.min.js"></script>
+<script>
+
+var urlRegex = /\b((?:https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[A-Z0-9+&@#\/%=~_|])/gim;
+
+$(document).ready(function () {
+    chrome.extension.sendRequest({}, function(response) {
+        addMessages(response);
+    });
+    
+    $('a').live('click', function() {        
+        chrome.tabs.create({url:$(this).attr('href'), selected:false});
+    });
+    
+    function addMessages(messages) {
+        $.each(messages, function(i, message) {
+            var text = message.text.replace(urlRegex, '<a href="$1">$1</a>');
+            var content =
+                '<img src="' +  message.user.profile_image_url + '" />' +
+                '<span class="name">' +
+                    '<a href="http://twitter.com/'+ message.user.screen_name + '">' +
+                        message.user.screen_name +
+                    '</a>' +
+                '</span>' +
+                '<span class="text">' + text + "</span>";
+            var div = $('<div class="status"></div>').append(content);
+            $('#messages').append(div);
+        });
+    }
+});
+</script>
+
+<div id="messages"></div>
