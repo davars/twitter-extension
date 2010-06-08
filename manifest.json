@@ -1,6 +1,6 @@
 {
   "name": "Twitter Home Timeline",
-  "version": "1.5",
+  "version": "1.6",
   "description": "Display Twitter home timeline updates.",
   "background_page": "background.html",
   "options_page": "options.html",
