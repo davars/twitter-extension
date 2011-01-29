@@ -11,6 +11,6 @@
   "permissions": [
     "notifications",
     "tabs",
-    "http://api.twitter.com/"
+    "https://api.twitter.com/"
   ]
 }

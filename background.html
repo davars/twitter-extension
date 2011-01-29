@@ -1,4 +1,7 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script type="text/javascript" src="oauthsimple.js"></script>
+<script type="text/javascript" src="oauth.js"></script>
+<script type="text/javascript" src="twitter.js"></script>
 <script>
 $(document).ready(function () {
     var receivedMessages = [];
@@ -45,16 +48,10 @@ $(document).ready(function () {
     }
         
     function onInterval() {
-        var username = localStorage.username;
-        var password = localStorage.password;
-        if(username && password) {
-            $.get('http://'+ username +':'+ password +
-                  '@api.twitter.com/1/statuses/home_timeline.json', function(messages) {
-                receivedMessages = messages;
-                generateNotifications();
-                setIcon();
-            });
-        }
+        Twitter().getTimeline(function (data) {
+            receivedMessages = data;
+            setIcon();
+        });
     }
     
     setInterval(onInterval, 60*1000);

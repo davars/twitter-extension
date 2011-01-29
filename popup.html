@@ -34,6 +34,10 @@ a {
 
 var urlRegex = /\b((?:https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[A-Z0-9+&@#\/%=~_|])/gim;
 
+var savePin = function() {
+    $('#authorization').hide();
+}
+
 $(document).ready(function () {
     chrome.extension.sendRequest({}, function(response) {
         addMessages(response);
@@ -60,5 +64,7 @@ $(document).ready(function () {
     }
 });
 </script>
-
 <div id="messages"></div>
+<div id="authorization" style="display:none;">
+    <input type="text" id="pin" /><button onclick="javascript:savePin();">Authorize</button>
+</div>
