@@ -48,7 +48,7 @@ $(document).ready(function () {
     }
         
     function onInterval() {
-        Twitter().getTimeline(function (data) {
+        Twitter.getTimeline(function (data) {
             receivedMessages = data;
             setIcon();
         });

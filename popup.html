@@ -27,44 +27,69 @@ a {
     color: #2276BB;
     text-decoration: none;
 }
+
+.templates {
+    display:none;
+}
 </style>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script type="text/javascript" src="mustache.js"></script>
+<script type="text/javascript" src="oauthsimple.js"></script>
+<script type="text/javascript" src="oauth.js"></script>
+<script type="text/javascript" src="twitter.js"></script>
+<script type="text/javascript" src="jquery.template.js"></script>
 <script>
 
 var urlRegex = /\b((?:https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[A-Z0-9+&@#\/%=~_|])/gim;
 
-var savePin = function() {
-    $('#authorization').hide();
-}
 
-$(document).ready(function () {
-    chrome.extension.sendRequest({}, function(response) {
-        addMessages(response);
+var addMessages = function(messages) {
+    $.each(messages, function(i, message) {
+        message.text = message.text.replace(urlRegex, '<a href="$1">$1</a>');
     });
-    
+    $('#messages').template('messages', {messages:messages});
+}
+var getMessages = function () {
     $('a').live('click', function() {        
         chrome.tabs.create({url:$(this).attr('href'), selected:false});
     });
     
-    function addMessages(messages) {
-        $.each(messages, function(i, message) {
-            var text = message.text.replace(urlRegex, '<a href="$1">$1</a>');
-            var content =
-                '<img src="' +  message.user.profile_image_url + '" />' +
-                '<span class="name">' +
-                    '<a href="http://twitter.com/'+ message.user.screen_name + '">' +
-                        message.user.screen_name +
-                    '</a>' +
-                '</span>' +
-                '<span class="text">' + text + "</span>";
-            var div = $('<div class="status"></div>').append(content);
-            $('#messages').append(div);
-        });
+    chrome.extension.sendRequest({}, function(response) {
+        addMessages(response);
+    });    
+}
+
+var open_options = function () {       
+    chrome.tabs.create({url:'options.html', selected:true});
+    return false;
+}
+
+$(document).ready(function () {
+    if(localStorage.access_token) {
+        getMessages();
+    } else {
+        if(localStorage)
+        $('#messages').append('<button onclick="open_options()">Setup</button>');
     }
 });
 </script>
-<div id="messages"></div>
-<div id="authorization" style="display:none;">
-    <input type="text" id="pin" /><button onclick="javascript:savePin();">Authorize</button>
+<div class="templates">
+    <div class="messages">
+        {{#messages}}
+        <div class="status"> 
+            {{#user}} 
+            <img src="{{profile_image_url}}" /> 
+                <span class="name"> 
+                    <a href="http://twitter.com/{{screen_name}}"> 
+                        {{screen_name}} 
+                    </a> 
+                </span> 
+            {{/user}} 
+                <span class="text">{{{text}}}</span> 
+        </div> 
+        {{/messages}} 
+    </div>
 </div>
+
+<div id="messages"></div>

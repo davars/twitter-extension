@@ -16,7 +16,22 @@ if(Twitter === undefined) {
         this.getTimeline = function(callback) {
             oauth.signedRequest("https://api.twitter.com/1/statuses/home_timeline.json", "GET", null, "json", callback);
         }
-        return this;
-    }
+        
+        this.getAuthorizeUrl = function(callback) {
+            oauth.requestToken(function(request_token) {
+               callback('https://api.twitter.com/oauth/authorize?oauth_token=' + request_token.oauth_token); 
+            });
+        }
+        
+        this.enterPin = function(pin, callback) {
+            oauth.accessToken(pin, callback);
+        }
+        return({
+            name: "twitter.js",
+            getTimeline: this.getTimeline,
+            getAuthorizeUrl: this.getAuthorizeUrl,
+            enterPin: this.enterPin
+        });
+    }();
 }
 

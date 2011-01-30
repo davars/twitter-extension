@@ -13,25 +13,28 @@ if(OAuth === undefined) {
             }).signed_url;
             $.get(url, function(data) {
                localStorage.request_token = data;
-               callback(OAuthSimple._parseParameterString(data));
+               callback(OAuthSimple()._parseParameterString(data));
             });
         }
         
-        this.accessToken = function(verifier, callback) {            
+        this.accessToken = function(verifier, callback) {
+            request_token = OAuthSimple()._parseParameterString(localStorage.request_token);
             var url = OAuthSimple().sign({
                 path:settings.access_url,
-                parameters: {oauth_verifier:verifier},
+                parameters: {
+                    oauth_verifier:verifier,
+                    oauth_token:request_token.oauth_token
+                },
                 signatures:{
                     api_key:settings.consumer_key,
                     shared_secret:settings.consumer_secret,
-                    oauth_token:request_token.oauth_token,
                     oauth_secret:request_token.oauth_token_secret
                 }                
             }).signed_url;
             $.get(url, function(data) {
-               localStorage.access_token = data;
-               localStorage.request_token = null;
-               callback(OAuthSimple._parseParameterString(data));
+                localStorage.access_token = data;
+                localStorage.removeItem('request_token');
+                callback(OAuthSimple()._parseParameterString(data));
             });
         }
         
@@ -57,6 +60,11 @@ if(OAuth === undefined) {
                 failure:failure
             })
         }
+        
+        this.authorized = function() {
+            return localStorage.access_token;
+        }
+        
         return this;
     }
     

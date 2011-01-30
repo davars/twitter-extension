@@ -3,11 +3,12 @@
 <title>Twitter Status Options</title>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script type="text/javascript" src="oauthsimple.js"></script>
+<script type="text/javascript" src="oauth.js"></script>
+<script type="text/javascript" src="twitter.js"></script>
 <script type="text/javascript">
 function save_options () {
-    localStorage.username = $('#username').val();
-    localStorage.password = $('#password').val();
-    localStorage.notifications = $('#notifications').attr('checked') ? "true" : "";
+    localStorage.notifications = $('#notifications').attr('checked') ? "true" : "";    
   
     // Update status to let user know options were saved.
     var status = $('#status');
@@ -18,11 +19,30 @@ function save_options () {
 }
 
 function restore_options() {
-    $('#username').val(localStorage.username);
-    $('#password').val(localStorage.password);
     $('#notifications').attr('checked', !!localStorage.notifications);
+    var linkedAccount = localStorage.access_token ?
+        OAuthSimple()._parseParameterString(localStorage.access_token).screen_name  :
+        'none';
+    $('#username').text(linkedAccount);
+    if(localStorage.access_token) {
+        $('.linked').show();
+        $('.not-linked').hide();
+    } else {
+        $('.linked').hide();
+        $('.not-linked').show();
+    }
+    
 }
 
+function reset_token() {
+    localStorage.removeItem('access_token');
+    restore_options();
+    var status = $('#status');
+    status.html('Cleared.');
+    setTimeout(function() {
+      status.html('');
+    }, 750);
+}
 function reset_last() {
     localStorage.removeItem('lastChecked');
     
@@ -31,6 +51,19 @@ function reset_last() {
     setTimeout(function() {
       status.html('');
     }, 750);
+}
+var save_pin = function() {
+    var pin = $('#pin').val();
+    Twitter.enterPin(pin, function(data) {
+        restore_options();
+        chrome.extension.sendRequest('start');
+    });
+}
+
+var get_pin = function() {
+    Twitter.getAuthorizeUrl(function(url) {
+        chrome.tabs.create({ 'url' : url});
+    });
 }
 
 $(document).ready(function() {    
@@ -45,12 +78,16 @@ $(document).ready(function() {
     <label id='status'></label>
     <ul>
         <li>
-            <label for="username">Username:</label>
-            <input name="username" id="username">
-        </li>
-        <li>             
-            <label for="password">Password:</label>           
-            <input name="password" id="password" type="password">
+            Twitter account: <span id="username"></span>
+            <div class="linked">
+                <button onclick="reset_token()">Clear</button>
+            </div>
+            <div class="not-linked">
+                <ol id="authorization">
+                    <li><button onclick="get_pin()">Get Pin</button></li>
+                    <li><input type="text" id="pin" /><button onclick="save_pin()">Authorize</button></li>
+                </ol>
+            </div>
         </li>
         <li>             
             <label for="notifications">Show a desktop notifications for new Tweets:</label>           
